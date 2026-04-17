@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Selector de gráficas</title>
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+      background: #f5f7fb;
+    }
+
+    #chart {
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    select {
+      padding: 8px;
+      font-size: 16px;
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Visualización con Plotly</h1>
+
+<label>Selecciona el tipo de gráfica:</label>
+<select id="tipoGrafica">
+  <option value="scatter">Puntos</option>
+  <option value="line">Línea</option>
+  <option value="bar">Barras</option>
+  <option value="pie">Pastel</option>
+</select>
+
+<div id="chart"></div>
+
+<footer>
+  Realizado con ❤️ por: Elias Aragon Alfaro
+</footer>
+
+<script>
+
+let x = [];
+let y = [];
+let label = "";
+
+function findNumericField(data) {
+  return Object.keys(data[0]).find(k => typeof data[0][k] === 'number');
+}
+
+function graficar(tipo) {
+
+  let trace;
+
+  if (tipo === "scatter") {
+    trace = {
+      x, y,
+      mode: 'markers',
+      type: 'scatter'
+    };
+  }
+
+  if (tipo === "line") {
+    trace = {
+      x, y,
+      mode: 'lines',
+      type: 'scatter'
+    };
+  }
+
+  if (tipo === "bar") {
+    trace = {
+      x, y,
+      type: 'bar'
+    };
+  }
+
+  if (tipo === "pie") {
+    trace = {
+      labels: x.slice(0,10),
+      values: y.slice(0,10),
+      type: 'pie'
+    };
+  }
+
+  Plotly.newPlot('chart', [trace], {
+    title: 'Tipo: ' + tipo
+  });
+}
+
+// Cargar datos
+fetch('https://api-colombia.com/api/v1/Region')
+  .then(res => res.json())
+  .then(data => {
+
+    const field = findNumericField(data);
+
+    x = data.map((item, i) => item.name || i);
+    y = data.map(item => item[field]);
+    label = field;
+
+    graficar("scatter"); // inicial
+
+  });
+
+// Evento del selector
+document.getElementById("tipoGrafica").addEventListener("change", function() {
+  graficar(this.value);
+});
+
+</script>
+
+</body>
+</html>
